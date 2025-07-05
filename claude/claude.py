@@ -7,6 +7,7 @@ import random
 from collections import deque, namedtuple
 from typing import List, Tuple, Optional
 import matplotlib.pyplot as plt
+import os
 
 class AppleGameEnvironment:
     def __init__(self, rows=10, cols=17):
@@ -205,10 +206,33 @@ class DQNAgent:
         self.target_network.load_state_dict(self.q_network.state_dict())
 
 class AppleGameSolver:
-    def __init__(self):
+    def __init__(self, model_path='apple_game_model.pth'):
         self.env = AppleGameEnvironment()
         self.agent = DQNAgent(state_shape=(3, 10, 17), action_size=170)
         self.scores = []
+        self.model_path = model_path
+    
+    def save_model(self):
+        torch.save({
+            'q_network_state_dict': self.agent.q_network.state_dict(),
+            'target_network_state_dict': self.agent.target_network.state_dict(),
+            'optimizer_state_dict': self.agent.optimizer.state_dict(),
+            'epsilon': self.agent.epsilon,
+            'scores': self.scores
+        }, self.model_path)
+        print(f"모델이 {self.model_path}에 저장되었습니다.")
+    
+    def load_model(self):
+        if os.path.exists(self.model_path):
+            checkpoint = torch.load(self.model_path, map_location=self.agent.device)
+            self.agent.q_network.load_state_dict(checkpoint['q_network_state_dict'])
+            self.agent.target_network.load_state_dict(checkpoint['target_network_state_dict'])
+            self.agent.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            self.agent.epsilon = checkpoint['epsilon']
+            self.scores = checkpoint['scores']
+            print(f"모델이 {self.model_path}에서 로드되었습니다.")
+            return True
+        return False
     
     def train(self, episodes=1000):
         print("Apple Game ML Solver 훈련 시작...")
@@ -240,6 +264,9 @@ class AppleGameSolver:
             if episode % 100 == 0:
                 avg_score = np.mean(self.scores[-100:]) if len(self.scores) >= 100 else np.mean(self.scores)
                 print(f"Episode {episode}, Average Score: {avg_score:.2f}, Epsilon: {self.agent.epsilon:.3f}")
+        
+        self.save_model()
+        print("훈련 완료 및 모델 저장됨")
     
     def solve(self, display_board=True):
         state = self.env.reset()
