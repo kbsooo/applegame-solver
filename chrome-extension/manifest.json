@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Apple Game Solver",
+  "version": "1.0",
+  "description": "AI-powered overlay for fruit box puzzle games",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://www.gamesaien.com/game/fruit_box_a/*"],
+      "js": ["content.js"],
+      "css": ["overlay.css"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["model.js", "overlay.css"],
+      "matches": ["https://www.gamesaien.com/*"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Apple Game Solver"
+  }
+}
