@@ -21,12 +21,28 @@ class AppleGameOverlay {
     }
 
     setup() {
+        console.log('Apple Game Solver: Setting up...');
+        console.log('Current URL:', window.location.href);
+        
         // Find the game canvas
         this.gameCanvas = document.getElementById('canvas');
         if (!this.gameCanvas) {
-            console.log('Apple Game Solver: Canvas not found, retrying...');
-            setTimeout(() => this.setup(), 1000);
-            return;
+            console.log('Apple Game Solver: Canvas not found, searching for alternative selectors...');
+            
+            // Try alternative selectors
+            this.gameCanvas = document.querySelector('canvas') || 
+                            document.querySelector('#game-canvas') ||
+                            document.querySelector('.game-canvas');
+            
+            if (!this.gameCanvas) {
+                console.log('Apple Game Solver: No canvas found, retrying in 2 seconds...');
+                setTimeout(() => this.setup(), 2000);
+                return;
+            } else {
+                console.log('Apple Game Solver: Found canvas with alternative selector');
+            }
+        } else {
+            console.log('Apple Game Solver: Canvas found with ID "canvas"');
         }
 
         // Create overlay
@@ -42,15 +58,19 @@ class AppleGameOverlay {
 
         // Listen for messages from popup
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            console.log('Content script received message:', request);
             if (request.action === 'toggleOverlay') {
                 this.overlayEnabled = request.enabled;
                 if (this.overlayEnabled) {
+                    console.log('Starting overlay');
                     this.startOverlay();
                 } else {
+                    console.log('Stopping overlay');
                     this.stopOverlay();
                 }
                 sendResponse({ success: true });
             }
+            return true; // Keep message channel open
         });
 
         console.log('Apple Game Solver: Initialized');

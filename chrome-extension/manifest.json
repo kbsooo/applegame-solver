@@ -5,13 +5,21 @@
   "description": "AI-powered overlay for fruit box puzzle games",
   "permissions": [
     "activeTab",
-    "scripting"
+    "scripting",
+    "storage",
+    "tabs"
   ],
   "content_scripts": [
     {
-      "matches": ["https://www.gamesaien.com/game/fruit_box_a/*"],
-      "js": ["content.js"],
-      "css": ["overlay.css"]
+      "matches": [
+        "https://www.gamesaien.com/game/fruit_box_a/*",
+        "https://www.gamesaien.com/game/fruit_box_a/",
+        "https://www.gamesaien.com/game/fruit_box_a",
+        "https://www.gamesaien.com/*"
+      ],
+      "js": ["test-content.js"],
+      "css": ["overlay.css"],
+      "run_at": "document_end"
     }
   ],
   "web_accessible_resources": [
