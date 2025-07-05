@@ -66,15 +66,15 @@ class AppleGameEnvironment:
     
     def step(self, action_positions):
         if not action_positions:
-            return self.get_state(), -1, True, {}
+            return self.get_state(), -1, True, {'score': self.score}
         
         values = [self.board[r, c] for r, c in action_positions]
         
         if sum(values) != 10:
-            return self.get_state(), -5, False, {}
+            return self.get_state(), -5, False, {'score': self.score}
         
         if not self.can_select_rectangle(action_positions):
-            return self.get_state(), -3, False, {}
+            return self.get_state(), -3, False, {'score': self.score}
         
         for r, c in action_positions:
             self.cleared[r, c] = True
@@ -173,10 +173,10 @@ class DQNAgent:
             return
         
         batch = random.sample(self.memory, batch_size)
-        states = torch.FloatTensor([e.state for e in batch]).to(self.device)
+        states = torch.FloatTensor(np.array([e.state for e in batch])).to(self.device)
         actions = [e.action for e in batch]
         rewards = torch.FloatTensor([e.reward for e in batch]).to(self.device)
-        next_states = torch.FloatTensor([e.next_state for e in batch]).to(self.device)
+        next_states = torch.FloatTensor(np.array([e.next_state for e in batch])).to(self.device)
         dones = torch.BoolTensor([e.done for e in batch]).to(self.device)
         
         current_q_values = self.q_network(states)
