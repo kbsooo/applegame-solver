@@ -20,9 +20,9 @@ class AppleGameSolver {
         return board;
     }
 
-    // Check if positions form a valid rectangle
-    canSelectRectangle(positions) {
-        if (positions.length < 2) return false;
+    // Check if positions form a valid rectangle (can skip cleared cells)
+    canSelectRectangle(positions, cleared) {
+        if (positions.length < 1) return false;
         
         const rows = positions.map(pos => pos[0]);
         const cols = positions.map(pos => pos[1]);
@@ -32,9 +32,14 @@ class AppleGameSolver {
         const minCol = Math.min(...cols);
         const maxCol = Math.max(...cols);
         
-        // Check if all positions within the rectangle are included
+        // Check if all non-cleared positions within the rectangle are included
         for (let r = minRow; r <= maxRow; r++) {
             for (let c = minCol; c <= maxCol; c++) {
+                // Skip if position is cleared (empty space)
+                if (cleared && cleared[r] && cleared[r][c]) {
+                    continue;
+                }
+                // If position is not cleared, it must be in the selection
                 if (!positions.some(pos => pos[0] === r && pos[1] === c)) {
                     return false;
                 }
@@ -46,29 +51,34 @@ class AppleGameSolver {
     // Find all valid combinations that sum to 10
     findValidCombinations(board, cleared) {
         const validMoves = [];
-        const availablePositions = [];
         
-        // Get all non-cleared positions
-        for (let r = 0; r < this.rows; r++) {
-            for (let c = 0; c < this.cols; c++) {
-                if (!cleared[r][c]) {
-                    availablePositions.push([r, c]);
-                }
-            }
-        }
-        
-        // Try all possible rectangular combinations
-        for (let i = 0; i < availablePositions.length; i++) {
-            for (let j = i + 1; j < Math.min(i + 20, availablePositions.length); j++) {
-                const subset = availablePositions.slice(i, j + 1);
-                if (this.canSelectRectangle(subset)) {
-                    const values = subset.map(pos => board[pos[0]][pos[1]]);
-                    if (values.reduce((a, b) => a + b, 0) === 10) {
-                        validMoves.push({
-                            positions: subset,
-                            values: values,
-                            score: values.length
-                        });
+        // Try all possible rectangular regions
+        for (let r1 = 0; r1 < this.rows; r1++) {
+            for (let c1 = 0; c1 < this.cols; c1++) {
+                for (let r2 = r1; r2 < this.rows; r2++) {
+                    for (let c2 = c1; c2 < this.cols; c2++) {
+                        // Get all non-cleared positions in this rectangle
+                        const positions = [];
+                        let sum = 0;
+                        
+                        for (let r = r1; r <= r2; r++) {
+                            for (let c = c1; c <= c2; c++) {
+                                if (!cleared[r][c]) {
+                                    positions.push([r, c]);
+                                    sum += board[r][c];
+                                }
+                            }
+                        }
+                        
+                        // Check if sum equals 10 and we have at least one apple
+                        if (sum === 10 && positions.length > 0) {
+                            const values = positions.map(pos => board[pos[0]][pos[1]]);
+                            validMoves.push({
+                                positions: positions,
+                                values: values,
+                                score: values.length
+                            });
+                        }
                     }
                 }
             }

@@ -48,5 +48,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         createTestOverlay();
         sendResponse({ success: true, message: 'Test overlay created' });
     }
+    if (request.action === 'toggleOverlay') {
+        console.log('Toggle overlay request received, enabled:', request.enabled);
+        if (request.enabled) {
+            createTestOverlay();
+        }
+        sendResponse({ success: true, message: 'Overlay toggled' });
+    }
     return true;
 });

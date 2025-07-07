@@ -42,21 +42,23 @@ class AppleGameEnv:
                         # 직사각형 영역의 합 계산 (빈 공간 제외)
                         total = 0
                         apple_count = 0
+                        positions = []
                         
                         for y in range(y1, y2 + 1):
                             for x in range(x1, x2 + 1):
                                 if not self.cleared[y, x]:
                                     total += self.board[y, x]
                                     apple_count += 1
+                                    positions.append((y, x))
                         
                         # 합이 10이고 최소 1개 이상의 사과가 있는 경우
                         if total == 10 and apple_count > 0:
-                            valid_rects.append((x1, y1, x2, y2, apple_count))
+                            valid_rects.append((x1, y1, x2, y2, apple_count, positions))
         
         return valid_rects
     
     def make_move(self, x1, y1, x2, y2):
-        """선택된 직사각형의 사과들을 제거"""
+        """선택된 직사각형의 사과들을 제거 (빈 공간 무시)"""
         removed_count = 0
         
         for y in range(y1, y2 + 1):
